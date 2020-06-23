@@ -5,8 +5,7 @@ const docQueue = [];
 window.$l = (arg) => {
     if (typeof arg === 'string') {
         const nodes = document.querySelectorAll(arg);
-        const nodesArray = Array.from(nodes);
-        return new domNode(nodesArray);
+        return new domNode(Array.from(nodesArray));
     } else if (arg instanceof HTMLElement) {
         return new domNode(arg);
     } else if (typeof arg === 'function') {
@@ -20,7 +19,7 @@ window.$l = (arg) => {
     }
 }
 
-function runDocQueue() {
+runDocQueue = () => {
     docQueue.forEach(fn => fn());
 }
 
@@ -30,11 +29,13 @@ $l.extend = (merger, ...others) => {
             merger[prop] = other[prop];
         }
     })
+    
     return merger;
 }
 
 $l.ajax = options => {
     const req = new XMLHttpRequest();
+
     const defaults = {
         contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
         method: 'GET',
@@ -43,33 +44,52 @@ $l.ajax = options => {
         error: () => { },
         data: {},
     };
+
     // set any defaults for options not passed as argument
     options = $l.extend(defaults, options);
     options.method = options.method.toUpperCase();
 
-    req.open(options.method, options.url);
-    req.onload = () => {
-        if (req.readyState === 4) {
-            if (req.status === 200) {
-                options.success(JSON.parse(req.response));
-            } else {
-                options.error(JSON.parse(req.response));
+    // from jQuery docs: `data: Data to be sent to the server. It is converted to a query string, if not already a string. It's appended to the url for GET-requests.`
+    if (options.method === 'GET') {
+        options.url += toQuery(options.data);
+    }
+
+    return new Promise((resolve, reject) => {
+        req.open(options.method, options.url);
+
+        req.onload = () => {
+            if (req.readyState === 4) {
+                if (req.status === 200) {
+                    options.success(JSON.parse(req.response));
+                    resolve(JSON.parse(req.response));
+                } else {
+                    options.error(JSON.parse(req.response));
+                    reject(JSON.parse(req.response));
+                }
             }
         }
-    }
-    req.onerror = () => console.log('An error occurred');
-    req.send(JSON.stringify(options.data));
+
+        req.onerror = () => {
+            console.log('An error occurred');
+            reject();
+        }
+
+        req.send(JSON.stringify(options.data));
+    })   
 }
 
-// $.ajax({
-//     type: 'GET',
-//     url: "http://api.openweathermap.org/data/2.5/weather?q=London,uk&appid=bcb83c4b54aee8418983c2aff3073b3b",
-//     success(data) {
-//         console.log("We have your weather!")
-//         console.log(data);
-//     },
-//     error() {
-//         console.error("An error occurred.");
-//     },
-// });
+toQuery = (data) => {
+    query = '?';
 
+    for (let key in data) {
+        query += `${key}=${data[key]}&`;
+    }
+
+    return query;
+}
+
+
+// $l.ajax({
+//     type: 'GET',
+//     url: "http://dummy.restapiexample.com/api/v1/employees"
+// }).then( data => console.log(data)).catch(error => console.log(error));
