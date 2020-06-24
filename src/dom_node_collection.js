@@ -12,6 +12,16 @@ class DomNodeCollection {
         }
     }
 
+    css(propName, val) {
+        if (typeof val === 'undefined') {
+            const ele = this.elements[0];
+            return window.getComputedStyle(ele).getPropertyValue(propName);
+        } else {
+            if (typeof val === 'number') val = `${parseFloat(val)}px`;
+            this.elements.forEach(ele => ele.style[propName] = val);
+        }
+    }
+
     empty() {
         this.elements.forEach(ele => ele.html = '');
     }
@@ -29,10 +39,10 @@ class DomNodeCollection {
     }
 
     attr(attrName, val) {
-        if (val) {
-            this.elements.forEach(ele => ele.setAttribute(attrName, val));
-        } else {
+        if (typeof val === 'undefined') {
             return this.elements[0].getAttribute(attrName);
+        } else {
+            this.elements.forEach(ele => ele.setAttribute(attrName, val));
         }
     }
 
