@@ -5,7 +5,7 @@ const docQueue = [];
 window.$l = (arg) => {
     if (typeof arg === 'string') {
         const nodes = document.querySelectorAll(arg);
-        return new domNode(Array.from(nodesArray));
+        return new domNode(Array.from(nodes));
     } else if (arg instanceof HTMLElement) {
         return new domNode(arg);
     } else if (typeof arg === 'function') {
@@ -17,20 +17,6 @@ window.$l = (arg) => {
             arg();
         }
     }
-}
-
-runDocQueue = () => {
-    docQueue.forEach(fn => fn());
-}
-
-$l.extend = (merger, ...others) => {
-    others.forEach( other => {
-        for (let prop in other) {
-            merger[prop] = other[prop];
-        }
-    })
-    
-    return merger;
 }
 
 $l.ajax = options => {
@@ -76,6 +62,20 @@ $l.ajax = options => {
 
         req.send(JSON.stringify(options.data));
     })   
+}
+
+runDocQueue = () => {
+    docQueue.forEach(fn => fn());
+}
+
+$l.extend = (merger, ...others) => {
+    others.forEach(other => {
+        for (let prop in other) {
+            merger[prop] = other[prop];
+        }
+    })
+
+    return merger;
 }
 
 toQuery = (data) => {
