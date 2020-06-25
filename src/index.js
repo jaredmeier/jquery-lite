@@ -1,8 +1,8 @@
-require('./query.js');
-const snakeGame = require('./game.js');
+require('./jarquery/query.js');
+const Game = require('./snake/game-view.js');
 
 $l(() => {
     // Page loaded
-    const game = new snakeGame();
+    const game = new Game();
 
 })

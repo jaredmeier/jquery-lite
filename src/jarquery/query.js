@@ -4,8 +4,13 @@ const docQueue = [];
 
 window.$l = (arg) => {
     if (typeof arg === 'string') {
-        const nodes = document.querySelectorAll(arg);
-        return new domNode(Array.from(nodes));
+        if (arg[0] === "<") {
+            let html = new DOMParser().parseFromString(arg, 'text/html');
+            return new domNode(Array.from(html.body.childNodes));
+        } else {
+            const nodes = document.querySelectorAll(arg);
+            return new domNode(Array.from(nodes));
+        }
     } else if (arg instanceof HTMLElement) {
         return new domNode(arg);
     } else if (typeof arg === 'function') {
